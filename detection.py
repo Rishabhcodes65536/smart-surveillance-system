@@ -71,10 +71,10 @@ frame_height = int(cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
 fourcc = cv2.VideoWriter_fourcc('X', 'V', 'I', 'D')
 out = cv2.VideoWriter("output.avi", fourcc, 15.0, (1280, 720))
 
-# Variables for motion detection
-motion_timer = 0  # Timer to track duration without motion
-motion_detected = False  # Flag to indicate motion detection
-motion_timeout = 25  # Timeout duration (in frames) without motion to stop saving
+
+motion_timer = 0  
+motion_detected = False
+motion_timeout = 150
 
 ret, frame1 = cap.read()
 ret, frame2 = cap.read()
@@ -88,12 +88,12 @@ while cap.isOpened():
     dilated = cv2.dilate(thresh, None, iterations=3)
     contours, _ = cv2.findContours(dilated, cv2.RETR_TREE, cv2.CHAIN_APPROX_SIMPLE)
 
-    motion_detected = False  # Reset motion detection flag for each frame
+    motion_detected = False 
 
     for contour in contours:
         if cv2.contourArea(contour) < 5000:
             continue
-        motion_detected = True  # Set motion detection flag if contour area is significant
+        motion_detected = True  
         (x, y, w, h) = cv2.boundingRect(contour)
         cv2.rectangle(frame1, (x, y), (x + w, y + h), (0, 255, 0), 2)
         cv2.putText(frame1, "Status: {}".format('Movement'), (10, 20), cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 0, 255), 2)
@@ -103,8 +103,8 @@ while cap.isOpened():
     else:
         motion_timer += 1
 
-    # Display the time since last movement on the video feed window
-    time_since_movement = motion_timer / 15  # Assuming 15 fps
+
+    time_since_movement = motion_timer / 15  
     cv2.putText(frame1, f"Time since last movement: {time_since_movement:.2f} seconds", (10, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     if motion_timer < motion_timeout:
@@ -112,6 +112,8 @@ while cap.isOpened():
         out.write(image)
         cv2.imshow("feed", frame1)
     else:
+        # cv2.putText(frame1, f"NOT RECORDING: {time_since_movement:.2f} seconds", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 0, 0), 1)
+        cv2.putText(frame1, "NOT RECORDING", (30, 50), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (0, 0, 255), 1)
         cv2.imshow("feed", frame1)
 
     frame1 = frame2
